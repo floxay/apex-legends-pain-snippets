@@ -19,9 +19,8 @@ struct RMdlPackedVertexTBN
 	// unpack packed tangent from 10 bits + normalized normal vector
 	Math::Vector3 UnpackTangent(Math::Vector3 Normal)
 	{
-		float x = (int32_t)_Value & 1023; // r2.x
 		float r2y = 1 + Normal.Z;
-		r2y = 1.f / r2y;  // rcp
+		r2y = 1.f / r2y;
 		float r2z = -r2y * Normal.X;
 		float r2w = Normal.Y * Normal.Y;
 		float r3x = r2z * Normal.Y;
@@ -31,7 +30,7 @@ struct RMdlPackedVertexTBN
 		float r3z = r2z * Normal.X + 1;
 		float r3y;
 		float r3w = r4y;
-		if (Normal.Z < -0.999899983)  // r1.w
+		if (Normal.Z < -0.999899983)
 		{
 			r2y = 0;
 			r2z = -1;
@@ -44,7 +43,7 @@ struct RMdlPackedVertexTBN
 			r2w = r3w;
 		}
 		float r4w = r3x;
-		if (Normal.Z < -0.999899983)  // r1.w
+		if (Normal.Z < -0.999899983)
 		{
 			r3x = -1;
 			r3y = 0;
@@ -56,7 +55,8 @@ struct RMdlPackedVertexTBN
 			r3y = r4x;
 			r3z = r4z;
 		}
-		x = 0.00614192151 * x;
+
+		float x = (_Value & 1023) * 0.00614192151;
 		float r2x = sin(x);
 		r4x = cos(x);
 		r3x *= r2x;
@@ -64,7 +64,7 @@ struct RMdlPackedVertexTBN
 		r3z *= r2x;
 		r2x = r2y * r4x + r3x;
 		r2y = r2z * r4x + r3y;
-		r2z = r2w * r4x * r3z;
+		r2z = r2w * r4x + r3z;
 
 		// normalizing
 		float r1w = r2x * r2x + r2y * r2y + r2z * r2z;
@@ -76,7 +76,7 @@ struct RMdlPackedVertexTBN
 		return Math::Vector3(r2x, r2y, r2z);
 	}
 
-	int8_t GetBinormalSign()
+	int8_t GetBitangentSign()
 	{
 		return _Value >> 31 ? -1 : 1;
 	}
